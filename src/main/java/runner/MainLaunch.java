@@ -21,8 +21,14 @@ import main.java.sqlitejdbc.SetQueryFields;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainLaunch {
     private Setting setting;
@@ -68,13 +74,15 @@ public class MainLaunch {
         ResultSetToTxt toTxt = new ResultSetToTxt("postvk.csv");
         ResultSetToTxt commToTxt = new ResultSetToTxt("commvk.csv");
         ApiPostVK apiPostVK = new ApiPostVK(setting);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+
         String[] strGroups = setting.getGroup_id().split("[, ]+");
         for(String group : strGroups) {
             System.out.println("Сообщество: " + group);
             GetResponse getPostGrp = apiPostVK.getPostGroup(Integer.parseInt(group));
 
             try {
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException ex) {
                 ex.fillInStackTrace();
                 Thread.currentThread().interrupt();
@@ -88,8 +96,9 @@ public class MainLaunch {
 
                 rs.addCell(gr.getId());
                 rs.addCell(group);
-
-                System.out.println("Id:" + gr.getId() + " userId:" + gr.getFromId() + " :" + gr.getText());
+                String dateL = new java.text.SimpleDateFormat("dd-MM-yy HH:mm").format(new java.util.Date(gr.getDate()*1000));
+                //LocalDate dateL = LocalDate.parse(gr.getDate().toString(), DateTimeFormatter.BASIC_ISO_DATE);
+                System.out.println("Id:" + gr.getId() + " userId:" + gr.getFromId() + " data:" + dateL +" :" + gr.getText());
 
                 //Данные о клиенте
                 VkUserDul userFioDr = getUserDul(apiPostVK, "" + gr.getFromId());
@@ -97,7 +106,13 @@ public class MainLaunch {
                 //Каптион
                 String strCaption = getCaption(gr.getAttachments());
                 //Комментарии
-                exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                //exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                //executor.submit(new CommentRunable(apiPostVK, group, gr.getId()));
+                executor.submit(() ->{
+                    String threadName = Thread.currentThread().getName();
+                    System.out.println("Gr" + threadName + " :" + group);
+                    exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                });
 
                 rs.addCell(strCaption);
                 rs.addCell(gr.getText());
@@ -111,7 +126,7 @@ public class MainLaunch {
                 if (j % 10 == 0) {
                     GetResponse getPostGrp2 = apiPostVK.getPostGroupOffs10(Integer.parseInt(group), j);
                     try {
-                        Thread.sleep(1000);
+                        TimeUnit.SECONDS.sleep(1);
                     } catch (InterruptedException ex) {
                         ex.fillInStackTrace();
                         Thread.currentThread().interrupt();
@@ -130,7 +145,14 @@ public class MainLaunch {
                             //Каптион
                             String strCaption = getCaption(gr.getAttachments());
                             //Комментарии
-                            exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                            //exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                            //new CommentRunable(apiPostVK, group, gr.getId());
+                            //executor.submit(new CommentRunable(apiPostVK, group, gr.getId()));
+                            executor.submit(() ->{
+                                String threadName = Thread.currentThread().getName();
+                                System.out.println("Gr" + threadName + " :" + group);
+                                exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                            });
 
                             rs.addCell(strCaption);
                             rs.addCell(gr.getText());
@@ -158,9 +180,18 @@ public class MainLaunch {
             System.out.println("Запись данных в БД!");
             //sqLiteDAO.insertBatch(tbl, insertQuery, 1000);
             toTxt.toFileTxtExport(tbl);
-            toTxt.fileClose();
-            commToTxt.fileClose();
+            //toTxt.fileClose();
+            //commToTxt.fileClose();
         }
+
+        //try {
+            System.out.println("attempt to shutdown executor");
+            executor.shutdown();
+            //executor.awaitTermination(5, TimeUnit.SECONDS);
+        //}
+        //catch (InterruptedException e) {
+        //    System.err.println("tasks interrupted");
+        //}
     }
 
     public VkUserDul getUserDul(ApiPostVK apiPostVK, String clientId) {
@@ -171,7 +202,7 @@ public class MainLaunch {
                 userFioDr = apiPostVK.getClientPost(clientId);
 
                 try {
-                    Thread.sleep(1000);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException ex) {
                     ex.fillInStackTrace();
                     Thread.currentThread().interrupt();
@@ -216,7 +247,7 @@ public class MainLaunch {
         GetCommentsResponse commentsAll = apiPostVK.getGroupComments(Integer.parseInt(group), commentId);
 
         try {
-            Thread.sleep(1000);
+            TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException ex) {
             ex.fillInStackTrace();
             Thread.currentThread().interrupt();
@@ -231,7 +262,8 @@ public class MainLaunch {
                 rsUser.addCell(commentId);
 
                 var comm = cm.getText();
-                System.out.println(":" + cm.getFromId() + " text:" + comm);
+                //LocalDate dateL = LocalDate.parse(cm.getDate().toString(), DateTimeFormatter.BASIC_ISO_DATE);
+                System.out.println(":" + cm.getFromId() + " data:" + cm.getDate() + " text:" + comm);
 
                 rsUser.addCell(comm);
                 rsUser.addCell(cm.getFromId());
@@ -245,7 +277,7 @@ public class MainLaunch {
                     rsUser.addCell(userFioDr.getBdate());
 
                     try {
-                        Thread.sleep(1000);
+                        TimeUnit.SECONDS.sleep(1);
                     } catch (InterruptedException ex) {
                         ex.fillInStackTrace();
                         Thread.currentThread().interrupt();

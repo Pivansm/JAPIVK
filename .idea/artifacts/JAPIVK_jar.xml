@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="JAPIVK:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/JAPIVK_jar</output-path>
+    <root id="archive" name="JAPIVK.jar">
+      <element id="module-output" name="JAPIVK" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/httpmime-4.5.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/commons-compress-1.19.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/gson-2.8.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/slf4j-jdk14-1.7.22.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/sdk-0.5.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/httpclient-4.5.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/slf4j-api-1.7.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/commons-io-2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/commons-logging-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/commons-collections4-4.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/sqlite-jdbc-3.31.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/httpcore-4.4.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Lib/commons-lang3-3.6.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

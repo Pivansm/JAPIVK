@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ApiPostVK {
@@ -152,7 +153,8 @@ public class ApiPostVK {
         // из документации: параметры могут передаваться как методом GET, так и POST. Если вы будете передавать большие данные (больше 2 килобайт), следует использовать POST.
         connection.setRequestMethod("GET");
         // посылаем запрос и сохраняем ответ
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        //BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.US_ASCII));
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
         String inputLine;
         StringBuffer userdul = new StringBuffer();
 
