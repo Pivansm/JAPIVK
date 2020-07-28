@@ -22,8 +22,12 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -96,7 +100,11 @@ public class MainLaunch {
 
                 rs.addCell(gr.getId());
                 rs.addCell(group);
-                String dateL = new java.text.SimpleDateFormat("dd-MM-yy HH:mm").format(new java.util.Date(gr.getDate()*1000));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String dateL = Instant.ofEpochSecond(gr.getDate())
+                        .atZone(ZoneId.of("GMT-4"))
+                        .format(formatter);
+                        //String dateL = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(gr.getDate()*1000L));
                 //LocalDate dateL = LocalDate.parse(gr.getDate().toString(), DateTimeFormatter.BASIC_ISO_DATE);
                 System.out.println("Id:" + gr.getId() + " userId:" + gr.getFromId() + " data:" + dateL +" :" + gr.getText());
 
