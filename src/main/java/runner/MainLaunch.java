@@ -2,6 +2,7 @@ package main.java.runner;
 
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.objects.users.responses.SearchResponse;
 import com.vk.api.sdk.objects.wall.WallPostFull;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.objects.wall.responses.GetCommentsResponse;
@@ -19,6 +20,7 @@ import main.java.sqlitejdbc.SQLiteDAO;
 import main.java.sqlitejdbc.SetQueryFields;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -59,7 +61,7 @@ public class MainLaunch {
             SetQueryFields insertComm = sqLiteDAO.fieldsToSqlParameter("COMMENTVK");
             //Заполнение тбл
             //postToFileTxt();
-            postToTableSqlite(insertQuery, insertComm);
+            //postToTableSqlite(insertQuery, insertComm);
             //postToTableReport();
             //getToGroupById();
             //Получить Id группы по краткому названии из файла
@@ -67,6 +69,13 @@ public class MainLaunch {
 
             //Клиент
             //userFindId("492829072");
+            //
+            getToIdUserReport();
+            //Список ID клиентов поиск
+            //getUsersToId("");
+            //Список друзей
+            //getFriendsToId();
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +87,7 @@ public class MainLaunch {
         ResultSetToTxt toTxt = new ResultSetToTxt("postvk.csv");
         ResultSetToTxt commToTxt = new ResultSetToTxt("commvk.csv");
         ApiPostVK apiPostVK = new ApiPostVK(setting);
-        ExecutorService executor = Executors.newFixedThreadPool(1);
+        //ExecutorService executor = Executors.newFixedThreadPool(1);
 
         String[] strGroups = setting.getGroup_id().split("[, ]+");
         for(String group : strGroups) {
@@ -100,27 +109,23 @@ public class MainLaunch {
 
                 rs.addCell(gr.getId());
                 rs.addCell(group);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String dateL = Instant.ofEpochSecond(gr.getDate())
-                        .atZone(ZoneId.of("GMT-4"))
-                        .format(formatter);
-                        //String dateL = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(gr.getDate()*1000L));
-                //LocalDate dateL = LocalDate.parse(gr.getDate().toString(), DateTimeFormatter.BASIC_ISO_DATE);
-                System.out.println("Id:" + gr.getId() + " userId:" + gr.getFromId() + " data:" + dateL +" :" + gr.getText());
 
+                String dateL = getDateFormatter(gr.getDate());
+                System.out.println("Id:" + gr.getId() + " userId:" + gr.getFromId() + " data:" + dateL +" :" + gr.getText());
+                rs.addCell(dateL);
                 //Данные о клиенте
                 VkUserDul userFioDr = getUserDul(apiPostVK, "" + gr.getFromId());
                 System.out.println("ФИО: " + userFioDr.getFullName() + " Др:" + userFioDr.getBdate());
                 //Каптион
                 String strCaption = getCaption(gr.getAttachments());
                 //Комментарии
-                //exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
                 //executor.submit(new CommentRunable(apiPostVK, group, gr.getId()));
-                executor.submit(() ->{
-                    String threadName = Thread.currentThread().getName();
-                    System.out.println("Gr" + threadName + " :" + group);
-                    exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
-                });
+                //executor.submit(() ->{
+                //    String threadName = Thread.currentThread().getName();
+                //    System.out.println("Gr" + threadName + " :" + group);
+                //    exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                //});
 
                 rs.addCell(strCaption);
                 rs.addCell(gr.getText());
@@ -141,26 +146,27 @@ public class MainLaunch {
                     }
                     if(getPostGrp2 != null) {
                         for (WallPostFull gr : getPostGrp2.getItems()) {
-                            System.out.println("Id:" + gr.getId() + " userId: " + gr.getFromId() + ": " + gr.getText());
+                            String dateL = getDateFormatter(gr.getDate());
+                            System.out.println("Id:" + gr.getId() + " userId: " + gr.getFromId() + " data:" + dateL + ": " + gr.getText());
                             Records rs = new Records();
 
                             rs.addCell(gr.getId());
                             rs.addCell(group);
-
+                            rs.addCell(dateL);
                             //Данные о клиенте
                             VkUserDul userFioDr = getUserDul(apiPostVK, "" + gr.getFromId());
                             System.out.println("ФИО: " + userFioDr.getFullName() + " Др:" + userFioDr.getBdate());
                             //Каптион
                             String strCaption = getCaption(gr.getAttachments());
                             //Комментарии
-                            //exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                            exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
                             //new CommentRunable(apiPostVK, group, gr.getId());
                             //executor.submit(new CommentRunable(apiPostVK, group, gr.getId()));
-                            executor.submit(() ->{
-                                String threadName = Thread.currentThread().getName();
-                                System.out.println("Gr" + threadName + " :" + group);
-                                exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
-                            });
+                            ///executor.submit(() ->{
+                            //    String threadName = Thread.currentThread().getName();
+                            //    System.out.println("Gr" + threadName + " :" + group);
+                            //    exportCommentsToRep(apiPostVK, group, gr.getId(), insertComm, commToTxt);
+                            //});
 
                             rs.addCell(strCaption);
                             rs.addCell(gr.getText());
@@ -188,13 +194,13 @@ public class MainLaunch {
             System.out.println("Запись данных в БД!");
             //sqLiteDAO.insertBatch(tbl, insertQuery, 1000);
             toTxt.toFileTxtExport(tbl);
-            //toTxt.fileClose();
-            //commToTxt.fileClose();
+            toTxt.fileClose();
+            commToTxt.fileClose();
         }
 
         //try {
-            System.out.println("attempt to shutdown executor");
-            executor.shutdown();
+            //System.out.println("attempt to shutdown executor");
+            //executor.shutdown();
             //executor.awaitTermination(5, TimeUnit.SECONDS);
         //}
         //catch (InterruptedException e) {
@@ -267,11 +273,13 @@ public class MainLaunch {
 
                 rsUser.addCell(cm.getId());
                 rsUser.addCell(group);
+
                 rsUser.addCell(commentId);
 
                 var comm = cm.getText();
-                //LocalDate dateL = LocalDate.parse(cm.getDate().toString(), DateTimeFormatter.BASIC_ISO_DATE);
-                System.out.println(":" + cm.getFromId() + " data:" + cm.getDate() + " text:" + comm);
+                String dateL = getDateFormatter(cm.getDate());
+                System.out.println(":" + cm.getFromId() + " data:" + dateL + " text:" + comm);
+                rsUser.addCell(dateL);
 
                 rsUser.addCell(comm);
                 rsUser.addCell(cm.getFromId());
@@ -338,6 +346,106 @@ public class MainLaunch {
         for(String gr : hashSet) {
             apiPostVK.getIDGroup(gr);
 
+        }
+    }
+
+    public void getToIdUserReport() {
+
+        ResultSetToTxt toTxtUser = new ResultSetToTxt("vkuser.csv");
+        ResultSetToTxt toTxtFriends = new ResultSetToTxt("vkfriends.csv");
+        ApiPostVK apiPostVK = new ApiPostVK(setting);
+        HashSet<String> hashSet = importFileGroup("c:\\Sun\\IN\\dfiodr.txt");
+
+        //for(String gr : hashSet) {
+            //apiPostVK.getIDGroup(gr);
+            //System.out.println("Id:" + gr);
+            //String[] nmUser = gr.split("\t");
+            //System.out.println("Id:" + nmUser[2] + " " + nmUser[1] + " DR:" + nmUser[3] + "." + nmUser[4]);
+            //getUsersToId(nmUser[2] + " " + nmUser[1], Integer.parseInt(nmUser[3]), Integer.parseInt(nmUser[4]), toTxtUser, toTxtFriends);
+            getUsersToId("Иван Пермяков", Integer.parseInt("8"), Integer.parseInt("9"), toTxtUser, toTxtFriends);
+
+            try {
+                apiPostVK.getUserToId("Пермяков Иван", "8", "9");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ApiException e) {
+                e.printStackTrace();
+            } catch (ClientException e) {
+                e.printStackTrace();
+            }
+        //}
+    }
+
+    public String getDateFormatter(long vkDate) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String dateL = Instant.ofEpochSecond(vkDate)
+                .atZone(ZoneId.of("GMT-4"))
+                .format(formatter);
+        return dateL;
+    }
+
+    public void getFriendsToId(int nmUser, ResultSetToTxt commToTxt) {
+        ApiPostVK apiPostVK = new ApiPostVK(setting);
+
+        com.vk.api.sdk.objects.friends.responses.GetResponse friendsAll = apiPostVK.getFriendsOffs10(nmUser, 0);
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException ex) {
+            ex.fillInStackTrace();
+            Thread.currentThread().interrupt();
+        }
+        if(friendsAll != null) {
+            TableRecordsAll tblFd = new TableRecordsAll();
+            for (var fd : friendsAll.getItems()) {
+                Records rsFriends = new Records();
+                System.out.println("Id:" + fd.toString());
+                VkUserDul userFioDr = getUserDul(apiPostVK, "" + fd.toString());
+                System.out.println("Фам: " + userFioDr.getFullName() + " Имя: " + " Др:" + userFioDr.getBdate());
+
+                rsFriends.addCell(fd.toString());
+                rsFriends.addCell(nmUser);
+                rsFriends.addCell(userFioDr.getFullName());
+                rsFriends.addCell(userFioDr.getBdate());
+                //В локал таблицу
+                tblFd.addRecords(rsFriends);
+            }
+            commToTxt.toFileTxtExport(tblFd);
+        }
+    }
+
+    public void getUsersToId(String nmUser, int nmDay, int nmMonth, ResultSetToTxt commToTxt, ResultSetToTxt commToFd) {
+        ApiPostVK apiPostVK = new ApiPostVK(setting);
+
+        SearchResponse usersAll = apiPostVK.getUsersIdOffs10(nmUser, nmDay, nmMonth);
+
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException ex) {
+            ex.fillInStackTrace();
+            Thread.currentThread().interrupt();
+        }
+        if(usersAll != null) {
+            TableRecordsAll tbl = new TableRecordsAll();
+            for (var fd : usersAll.getItems()) {
+                Records rsUser = new Records();
+                System.out.println("Id:" + fd.toString());
+                VkUserDul userFioDr = getUserDul(apiPostVK, "" + fd.getId());
+                System.out.println("Фам: " + userFioDr.getFullName() + " Имя: " + " Др:" + userFioDr.getBdate());
+
+                rsUser.addCell(fd.getId());
+                rsUser.addCell(userFioDr.getFullName());
+                rsUser.addCell(userFioDr.getBdate());
+
+                //Друзья
+                getFriendsToId(fd.getId(), commToFd);
+
+                //В локал таблицу
+                tbl.addRecords(rsUser);
+            }
+            commToTxt.toFileTxtExport(tbl);
         }
     }
 

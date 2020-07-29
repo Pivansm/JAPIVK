@@ -15,7 +15,7 @@ public class ResultSetToTxt {
     public void toFileTxtExport(TableRecordsAll tbl) {
         try
         {
-            fileWriter = new FileWriter(new File(this.pathFile));
+            fileWriter = new FileWriter(new File(this.pathFile), true);
             for(Records row: tbl.getListRec()) {
                 for(int i = 0, collCount = row.cellCount(); i < collCount; i++) {
                     if(collCount > 0) {
