@@ -114,11 +114,11 @@ public class ApiPostVK {
         try {
 
             com.vk.api.sdk.objects.users.responses.SearchResponse getPostGrp = vk.users().search(actor)
-                    //.q(nmUser)
-                    .q("Пермяков Иван")
-                    //.birthDay(nmDay)
-                    //.birthMonth(nmMonth)
-                    .birthYear(1963)
+                    .q(nmUser)
+                    //.q("Пермяков Иван")
+                    .birthDay(nmDay)
+                    .birthMonth(nmMonth)
+                    //.birthYear(1963)
                     .count(5)
                     .execute();
 
@@ -221,7 +221,7 @@ public class ApiPostVK {
     public void getUserToId(String nmUser, String birth_day, String birth_month) throws IOException, ClientException, ApiException {
 
         Gson gson = new Gson();
-        String url = "https://api.vk.com/method/users.search?q=" +  nmUser + "&count=10" + "&birth_day=" + birth_day + "&birth_month=" + birth_month + "&access_token=" + setting.getAccess_token() + "&v=5.110";
+        String url = "https://api.vk.com/method/users.search?q=" +  nmUser + "&count=10" + "&birth_day=" + birth_day + "&birth_month=" + birth_month + "&fields=bdate&access_token=" + setting.getAccess_token() + "&v=5.110";
         //response = urllib.request.urlopen(URL + 'users.search?q=' + q + '&count=' + count + '&birth_day=' + birth_day + '&birth_month=' + birth_month + '&birth_year=' + birth_year + '&v=5.52&access_token=' + token)
         URL obj = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) obj.openConnection();

@@ -354,27 +354,28 @@ public class MainLaunch {
         ResultSetToTxt toTxtUser = new ResultSetToTxt("vkuser.csv");
         ResultSetToTxt toTxtFriends = new ResultSetToTxt("vkfriends.csv");
         ApiPostVK apiPostVK = new ApiPostVK(setting);
-        HashSet<String> hashSet = importFileGroup("c:\\Sun\\IN\\dfiodr.txt");
+        HashSet<String> hashSet = importFileGroup("c:\\Sun\\IN\\dfiodr2.txt");
+        System.out.println("Size:" + hashSet.size());
 
-        //for(String gr : hashSet) {
+        for(String gr : hashSet) {
             //apiPostVK.getIDGroup(gr);
             //System.out.println("Id:" + gr);
-            //String[] nmUser = gr.split("\t");
-            //System.out.println("Id:" + nmUser[2] + " " + nmUser[1] + " DR:" + nmUser[3] + "." + nmUser[4]);
-            //getUsersToId(nmUser[2] + " " + nmUser[1], Integer.parseInt(nmUser[3]), Integer.parseInt(nmUser[4]), toTxtUser, toTxtFriends);
-            getUsersToId("Иван Пермяков", Integer.parseInt("8"), Integer.parseInt("9"), toTxtUser, toTxtFriends);
+            String[] nmUser = gr.split("\t");
+            System.out.println("Id:" + nmUser[1] + " " + nmUser[0] + " DR:" + nmUser[2] + "." + nmUser[3]);
+            getUsersToId(nmUser[1] + " " + nmUser[0], Integer.parseInt(nmUser[2]), Integer.parseInt(nmUser[3]), toTxtUser, toTxtFriends);
+            //getUsersToId("Иван Пермяков", Integer.parseInt("8"), Integer.parseInt("9"), toTxtUser, toTxtFriends);
 
-            try {
-                apiPostVK.getUserToId("Пермяков Иван", "8", "9");
+            //try {
+            //    apiPostVK.getUserToId("Пермяков Иван", "8", "9");
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ApiException e) {
-                e.printStackTrace();
-            } catch (ClientException e) {
-                e.printStackTrace();
-            }
-        //}
+            //} catch (IOException e) {
+            //    e.printStackTrace();
+            //} catch (ApiException e) {
+            //    e.printStackTrace();
+            //} catch (ClientException e) {
+            //    e.printStackTrace();
+            //}
+        }
     }
 
     public String getDateFormatter(long vkDate) {
