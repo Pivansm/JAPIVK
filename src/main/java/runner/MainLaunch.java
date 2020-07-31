@@ -354,7 +354,7 @@ public class MainLaunch {
         ResultSetToTxt toTxtUser = new ResultSetToTxt("vkuser.csv");
         ResultSetToTxt toTxtFriends = new ResultSetToTxt("vkfriends.csv");
         ApiPostVK apiPostVK = new ApiPostVK(setting);
-        HashSet<String> hashSet = importFileGroup("c:\\Sun\\IN\\dfiodr2.txt");
+        HashSet<String> hashSet = importFileGroup("c:\\Sun\\IN\\dfiodr3.txt");
         System.out.println("Size:" + hashSet.size());
 
         for(String gr : hashSet) {
@@ -403,13 +403,22 @@ public class MainLaunch {
             for (var fd : friendsAll.getItems()) {
                 Records rsFriends = new Records();
                 System.out.println("Id:" + fd.toString());
-                VkUserDul userFioDr = getUserDul(apiPostVK, "" + fd.toString());
-                System.out.println("Фам: " + userFioDr.getFullName() + " Имя: " + " Др:" + userFioDr.getBdate());
-
                 rsFriends.addCell(fd.toString());
                 rsFriends.addCell(nmUser);
-                rsFriends.addCell(userFioDr.getFullName());
-                rsFriends.addCell(userFioDr.getBdate());
+                try {
+                    VkUserDul userFioDr = getUserDul(apiPostVK, "" + fd.toString());
+                    System.out.println("Фам: " + userFioDr.getFullName() + " Имя: " + " Др:" + userFioDr.getBdate());
+
+
+                    rsFriends.addCell(userFioDr.getFullName());
+                    rsFriends.addCell(userFioDr.getBdate());
+                }catch (Exception ex) {
+                    ex.fillInStackTrace();
+                    System.out.println("Ошибка коннекта");
+                    rsFriends.addCell("Ошибка");
+                    rsFriends.addCell("Ошибка");
+                }
+
                 //В локал таблицу
                 tblFd.addRecords(rsFriends);
             }
